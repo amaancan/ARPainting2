@@ -1,7 +1,7 @@
 import UIKit
 import ARKit
 
-class CanvasViewController: UIViewController, ARSCNViewDelegate {
+class CanvasViewController: UIViewController {
 
   // A view that enables you to display an AR experience with SceneKit.
   @IBOutlet weak var sceneView: ARSCNView!
@@ -9,19 +9,11 @@ class CanvasViewController: UIViewController, ARSCNViewDelegate {
 
   internal var brushSettings: BrushSettings!
 
-  // When we start the augmented reality (AR) session, we need to specify
-  // an AR configuration to use.
+  // When we start the augmented reality (AR) session, we need to specify an AR configuration to use.
   // ARWorldTrackingConfiguration is the full-fidelity configuration
   // that uses the rear camera and does the following:
   //
-  // - Tracks the device’s position in 3D space relative to
-  //   it starting point (x-, y-, and z-position)
-  // - Tracks the device’s orientation (its tilt around the x-,
-  //   y-, and z-axes
-  // - Detects real-world flat surfaces
-  //
-  // For this app, we’re concerned only about tracking the device’s
-  // position and orientation (a.k.a. the “six degrees of freedom”).
+  // - Tracks the device’s position + orientation (its tilt around the 3 axises + real-world flat surfaces
   let configuration = ARWorldTrackingConfiguration()
 
   required init?(coder aDecoder: NSCoder) {
@@ -30,89 +22,13 @@ class CanvasViewController: UIViewController, ARSCNViewDelegate {
 
   override func viewDidLoad() {
     super.viewDidLoad()
+    setupSceneView()
 
     let customTabBarController = self.tabBarController as! CustomTabBarController
     brushSettings = customTabBarController.brushSettings
-
-    // Set up the AR SceneKit view
-    // We’ll handle the ARSCNViewDelegate methods in this class.
-    sceneView.delegate = self
-
-    // This turns on the two available debugging options:
-    //
-    // 1. showWorldOrigin, which shows the AR session origin,
-    //    which is defined by the phone’s location at the start
-    //    of the AR session. The origin is marked by the intersection
-    //    of 3 line segments:
-    //    - x-axis, denoted by a red line segment
-    //    - y-axis, denoted by a green line segment
-    //    - z-axis, denoted by a blue line segment
-    // 2. showFeaturePoints, which represents points on flat
-    //    horizontal surfaces that ARKit uses as reference points
-    sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin,
-                           ARSCNDebugOptions.showFeaturePoints]
-
-    // Turns on SceneKit’s statistics view
-    sceneView.showsStatistics = true
-
-    // Turns on a virtual omnidirectional light source located
-    // at the same location as the device.
-    sceneView.autoenablesDefaultLighting = true
-
-    // Starts the AR session.
-    sceneView.session.run(configuration)
-
   }
 
-  override func didReceiveMemoryWarning() {
-    super.didReceiveMemoryWarning()
-    // Dispose of any resources that can be recreated.
-  }
-
-  // MARK: ARSCNViewDelegate methods
-  // ===============================
-
-  // Called every time the augmented reality scene is about to be rendered (ideally, at least 60 times a second).
-  func renderer(_ renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: TimeInterval) {
-    // A canvas‘ pointOfView is a node representing the camera‘s point of view.
-    guard let cameraNode = sceneView.pointOfView else { return }
-
-    let transform = cameraNode.transform
-
-    // The orientation is in the 3rd column of the transform matrix.
-    let orientation = SCNVector3(-transform.m31,
-                                 -transform.m32,
-                                 -transform.m33)
-
-    // The location is in the 4th column of the transform matrix.
-    let location = SCNVector3(transform.m41,
-                              transform.m42,
-                              transform.m43)
-    let position = orientation + location
-    print("location: \(location)\norientation: \(orientation)")
-
-    // By putting this code in a “DispatchQueue.main.async” block,
-    // we ensure that this code gets executed in the main queue.
-    // We need to do this because we’re removing nodes from the scene
-    // and checking the state of the “Paint” button, both of which
-    // need to be done in the main queue.
-    DispatchQueue.main.async {
-      if self.paintButton.isHighlighted {
-
-        if self.brushSettings.isSpinning {
-
-        }
-      } else {
-
-      }
-
-    }
-  }
-
-  // MARK: Node creation methods
-  // ===========================
-
-  // Erase any nodes with the given name.
+  // MARK: - Node creation methods
   func eraseNodes(named nameToErase: String) {
     self.sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
       if node.name == nameToErase {
@@ -133,51 +49,99 @@ class CanvasViewController: UIViewController, ARSCNViewDelegate {
     let brush: SCNNode!
 
     switch brushShape {
-      case .box:
-        brush = SCNNode(geometry: SCNBox(width: shapeSize,
-                                         height: shapeSize,
-                                         length: shapeSize,
-                                         chamferRadius: 0))
-      case .capsule:
-        brush = SCNNode(geometry: SCNCapsule(capRadius: shapeSize / 8,
-                                             height: shapeSize))
-        brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
-      case .cone:
-        brush = SCNNode(geometry: SCNCone(topRadius: 0,
-                                          bottomRadius: shapeSize / 8,
-                                          height: shapeSize))
-        brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
-      case .cylinder:
-        brush = SCNNode(geometry: SCNCylinder(radius: shapeSize / 8,
-                                              height: shapeSize))
-        brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
-      case .pyramid:
-        brush = SCNNode(geometry: SCNPyramid(width: shapeSize,
-                                             height: shapeSize,
-                                             length: shapeSize))
-      case .sphere:
-        brush = SCNNode(geometry: SCNSphere(radius: shapeSize / 2))
-      case .torus:
-        brush = SCNNode(geometry: SCNTorus(ringRadius: shapeSize / 2,
-                                           pipeRadius: shapeSize / 8))
-        brush.eulerAngles = SCNVector3(Double.pi / 2, 0, 0)
-      case .tube:
-        brush = SCNNode(geometry: SCNTube(innerRadius: shapeSize / 10,
-                                          outerRadius: shapeSize / 8,
-                                          height: shapeSize))
-        brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
+    case .box:
+      brush = SCNNode(geometry: SCNBox(width: shapeSize,
+                                       height: shapeSize,
+                                       length: shapeSize,
+                                       chamferRadius: 0))
+    case .capsule:
+      brush = SCNNode(geometry: SCNCapsule(capRadius: shapeSize / 8,
+                                           height: shapeSize))
+      brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
+    case .cone:
+      brush = SCNNode(geometry: SCNCone(topRadius: 0,
+                                        bottomRadius: shapeSize / 8,
+                                        height: shapeSize))
+      brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
+    case .cylinder:
+      brush = SCNNode(geometry: SCNCylinder(radius: shapeSize / 8,
+                                            height: shapeSize))
+      brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
+    case .pyramid:
+      brush = SCNNode(geometry: SCNPyramid(width: shapeSize,
+                                           height: shapeSize,
+                                           length: shapeSize))
+    case .sphere:
+      brush = SCNNode(geometry: SCNSphere(radius: shapeSize / 2))
+    case .torus:
+      brush = SCNNode(geometry: SCNTorus(ringRadius: shapeSize / 2,
+                                         pipeRadius: shapeSize / 8))
+      brush.eulerAngles = SCNVector3(Double.pi / 2, 0, 0)
+    case .tube:
+      brush = SCNNode(geometry: SCNTube(innerRadius: shapeSize / 10,
+                                        outerRadius: shapeSize / 8,
+                                        height: shapeSize))
+      brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
     }
 
     brush.position = position
     return brush
   }
+
+  // MARK: - Helpers
+  private func setupSceneView() {
+    sceneView.delegate = self
+    sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin,
+                              ARSCNDebugOptions.showFeaturePoints]
+    sceneView.showsStatistics = true
+
+    // Turns on a virtual omnidirectional light source located
+    // at the same location as the device.
+    sceneView.autoenablesDefaultLighting = true
+
+    // Starts the AR session.
+    sceneView.session.run(configuration)
+  }
 }
 
+// MARK: - ARSCNViewDelegate methods
+extension CanvasViewController: ARSCNViewDelegate {
 
-// MARK: Utility methods
-// =====================
+  // Called every time the augmented reality scene is about to be rendered (ideally, at least 60 times a second).
+  func renderer(_ renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: TimeInterval) {
+    guard let cameraNode = sceneView.pointOfView else { return }
 
-// Extend the "+" operator so that it can add two SCNVector3s together.
+    let transform = cameraNode.transform
+
+    // The orientation is in the 3rd column of the transform matrix.
+    let orientation = SCNVector3(-transform.m31,
+                                 -transform.m32,
+                                 -transform.m33)
+
+    // The location is in the 4th column of the transform matrix.
+    let location = SCNVector3(transform.m41,
+                              transform.m42,
+                              transform.m43)
+    let position = orientation + location
+    print("location: \(location)\norientation: \(orientation)")
+
+    // removing nodes from the scene
+    // and checking the state of the “Paint” button
+    DispatchQueue.main.async {
+
+      if self.paintButton.isHighlighted {
+
+        if self.brushSettings.isSpinning {
+
+        }
+      } else {
+
+      }
+
+    }
+  }
+}
+
 func +(left: SCNVector3, right: SCNVector3) -> SCNVector3 {
   return SCNVector3(left.x + right.x,
                     left.y + right.y,

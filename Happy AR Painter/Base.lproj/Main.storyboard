@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="RHm-Yf-sZS">
+    <device id="retina4_0" orientation="portrait" appearance="light"/>
     <dependencies>
+        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15509"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -11,47 +13,47 @@
             <objects>
                 <viewController id="42y-0T-Civ" userLabel="Palette" customClass="PaletteViewController" customModule="Happy_AR_Painter" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="kaD-1S-aQr">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select brush color and type:" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PHL-av-do2">
-                                <rect key="frame" x="0.0" y="18" width="600" height="21"/>
+                                <rect key="frame" x="0.0" y="18" width="320" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Emr-rE-fHA">
-                                <rect key="frame" x="0.0" y="18" width="600" height="270"/>
+                                <rect key="frame" x="0.0" y="18" width="320" height="270"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="270" id="BM1-xi-I4s"/>
                                 </constraints>
                             </pickerView>
                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="929-2o-Naw">
-                                <rect key="frame" x="275.5" y="387" width="51" height="31"/>
+                                <rect key="frame" x="135.5" y="387" width="51" height="31"/>
                                 <connections>
                                     <action selector="spinningShapesSwitchChanged:" destination="42y-0T-Civ" eventType="valueChanged" id="JT7-RX-Mmm"/>
                                 </connections>
                             </switch>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Flz-cI-nXS">
-                                <rect key="frame" x="245.5" y="392" width="22" height="21"/>
+                                <rect key="frame" x="105.5" y="392" width="22" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Yes" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="N0y-cI-05o">
-                                <rect key="frame" x="332.5" y="392" width="28" height="21"/>
+                                <rect key="frame" x="192.5" y="392" width="28" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="nAf-iE-dSN">
-                                <rect key="frame" x="14" y="304" width="572" height="31"/>
+                                <rect key="frame" x="14" y="304" width="292" height="31"/>
                                 <connections>
                                     <action selector="brushSizeSliderChanged:" destination="42y-0T-Civ" eventType="valueChanged" id="jCL-CL-mIr"/>
                                 </connections>
                             </slider>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Brush size" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Avu-7E-GNt">
-                                <rect key="frame" x="0.0" y="275" width="600" height="21"/>
+                                <rect key="frame" x="0.0" y="275" width="320" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="QLF-oJ-aI8"/>
                                 </constraints>
@@ -60,7 +62,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Paint spinning shapes?" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Gqm-aO-dw6">
-                                <rect key="frame" x="0.0" y="356" width="600" height="21"/>
+                                <rect key="frame" x="0.0" y="356" width="320" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="21" id="ll1-Hg-dNg"/>
                                 </constraints>
@@ -113,14 +115,14 @@
             <objects>
                 <viewController id="rtR-W7-VhI" userLabel="Canvas" customClass="CanvasViewController" customModule="Happy_AR_Painter" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="3HE-fx-6Th">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <arscnView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="skj-uR-qMl">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="551"/>
+                                <rect key="frame" x="0.0" y="0.0" width="320" height="519"/>
                             </arscnView>
                             <button opaque="NO" alpha="0.75" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MeJ-zg-HRN">
-                                <rect key="frame" x="16" y="498" width="568" height="33"/>
+                                <rect key="frame" x="16" y="466" width="288" height="33"/>
                                 <color key="backgroundColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                                 <fontDescription key="fontDescription" type="system" weight="black" pointSize="17"/>
                                 <state key="normal" title="Paint">
