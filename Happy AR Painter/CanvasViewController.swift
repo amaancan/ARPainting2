@@ -7,20 +7,24 @@ class CanvasViewController: UIViewController {
   @IBOutlet weak var sceneView: ARSCNView!
   @IBOutlet weak var paintButton: UIButton!
 
-  internal var brushSettings: BrushSettings!
+  var brushSettings: BrushSettings!
 
   // When we start the augmented reality (AR) session, we need to specify an AR configuration to use.
   // ARWorldTrackingConfiguration is the full-fidelity configuration
-  // that uses the rear camera and does the following:
-  //
-  // - Tracks the device’s position + orientation (its tilt around the 3 axises + real-world flat surfaces
-  let configuration = ARWorldTrackingConfiguration()
-  let brushNodeCursor: (name: String , colour: UIColor) = ("cursor", .lightGray)
+  // that uses the rear camera to:
+  // - tracks the device’s position + orientation (its tilt around the 3 axises + real-world flat surfaces
+  private let configuration = ARWorldTrackingConfiguration()
+  private let paintNodeCursorState: (name: String , colour: UIColor) = ("cursor", .lightGray)
+
+  private var userIsPressingPaintButton: Bool {
+    return paintButton.isHighlighted
+  }
 
   required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
   }
 
+  // MARK: - View Lifecycle
   override func viewDidLoad() {
     super.viewDidLoad()
     setupSceneView()
@@ -29,8 +33,8 @@ class CanvasViewController: UIViewController {
     brushSettings = customTabBarController.brushSettings
   }
 
-  // MARK: - Node creation methods
-  func eraseNodes(named nameToErase: String) {
+  // MARK: - Private Helpers
+  private func eraseNodes(named nameToErase: String) {
     self.sceneView.scene.rootNode.enumerateChildNodes { (node, _) in
       if node.name == nameToErase {
         node.removeFromParentNode()
@@ -40,56 +44,92 @@ class CanvasViewController: UIViewController {
 
   // Create a node based on the current brush settings
   // and the camera’s current position.
-  func makeBrushNode(brushShape: BrushSettings.Shape,
-                   brushSize: CGFloat,
-                   position: SCNVector3) -> SCNNode {
+  private func makePaintNode(brushShape: BrushSettings.Shape,
+                             brushSize: CGFloat,
+                             position: SCNVector3) -> SCNNode {
     let minSize: CGFloat = 0.02
     let maxSize: CGFloat = 0.5
     let shapeSize = minSize + brushSize * (minSize + maxSize)
 
-    let brush: SCNNode!
+    let paintNode: SCNNode!
 
     switch brushShape {
     case .box:
-      brush = SCNNode(geometry: SCNBox(width: shapeSize,
-                                       height: shapeSize,
-                                       length: shapeSize,
-                                       chamferRadius: 0))
-    case .capsule:
-      brush = SCNNode(geometry: SCNCapsule(capRadius: shapeSize / 8,
-                                           height: shapeSize))
-      brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
-    case .cone:
-      brush = SCNNode(geometry: SCNCone(topRadius: 0,
-                                        bottomRadius: shapeSize / 8,
-                                        height: shapeSize))
-      brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
-    case .cylinder:
-      brush = SCNNode(geometry: SCNCylinder(radius: shapeSize / 8,
-                                            height: shapeSize))
-      brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
-    case .pyramid:
-      brush = SCNNode(geometry: SCNPyramid(width: shapeSize,
+      paintNode = SCNNode(geometry: SCNBox(width: shapeSize,
                                            height: shapeSize,
-                                           length: shapeSize))
+                                           length: shapeSize,
+                                           chamferRadius: 0))
+    case .capsule:
+      paintNode = SCNNode(geometry: SCNCapsule(capRadius: shapeSize / 8,
+                                               height: shapeSize))
+      paintNode.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
+    case .cone:
+      paintNode = SCNNode(geometry: SCNCone(topRadius: 0,
+                                            bottomRadius: shapeSize / 8,
+                                            height: shapeSize))
+      paintNode.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
+    case .cylinder:
+      paintNode = SCNNode(geometry: SCNCylinder(radius: shapeSize / 8,
+                                                height: shapeSize))
+      paintNode.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
+    case .pyramid:
+      paintNode = SCNNode(geometry: SCNPyramid(width: shapeSize,
+                                               height: shapeSize,
+                                               length: shapeSize))
     case .sphere:
-      brush = SCNNode(geometry: SCNSphere(radius: shapeSize / 2))
+      paintNode = SCNNode(geometry: SCNSphere(radius: shapeSize / 2))
     case .torus:
-      brush = SCNNode(geometry: SCNTorus(ringRadius: shapeSize / 2,
-                                         pipeRadius: shapeSize / 8))
-      brush.eulerAngles = SCNVector3(Double.pi / 2, 0, 0)
+      paintNode = SCNNode(geometry: SCNTorus(ringRadius: shapeSize / 2,
+                                             pipeRadius: shapeSize / 8))
+      paintNode.eulerAngles = SCNVector3(Double.pi / 2, 0, 0)
     case .tube:
-      brush = SCNNode(geometry: SCNTube(innerRadius: shapeSize / 10,
-                                        outerRadius: shapeSize / 8,
-                                        height: shapeSize))
-      brush.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
+      paintNode = SCNNode(geometry: SCNTube(innerRadius: shapeSize / 10,
+                                            outerRadius: shapeSize / 8,
+                                            height: shapeSize))
+      paintNode.eulerAngles = SCNVector3(0, 0, Double.pi / 2)
     }
 
-    brush.position = position
-    return brush
+    paintNode.position = position
+
+    return paintNode
   }
 
-  // MARK: - Helpers
+  private func paintNode(at position: SCNVector3) {
+    let paintNode = makePaintNode(brushShape: brushSettings.shape,
+                                       brushSize: brushSettings.size,
+                                       position: position)
+
+
+    if userIsPressingPaintButton {
+      paintNode.geometry?.firstMaterial?.diffuse.contents = brushSettings.color
+      paintNode.geometry?.firstMaterial?.specular.contents = UIColor.white
+
+      if brushSettings.isSpinning {
+
+      }
+    } else {
+      paintNode.geometry?.firstMaterial?.diffuse.contents = paintNodeCursorState.colour
+      paintNode.name = paintNodeCursorState.name
+    }
+
+    sceneView.scene.rootNode.addChildNode(paintNode)
+  }
+
+  private func getNodePosition(fromTransform transform: SCNMatrix4) -> SCNVector3 {
+    // The orientation is in the 3rd column of the transform matrix.
+    let nodeOrientation = SCNVector3(-transform.m31,
+                                       -transform.m32,
+                                       -transform.m33)
+
+    // The location is in the 4th column of the transform matrix.
+    let nodeLocation = SCNVector3(transform.m41,
+                                    transform.m42,
+                                    transform.m43)
+
+    let nodePosition = nodeOrientation + nodeLocation
+    return nodePosition
+  }
+
   private func setupSceneView() {
     sceneView.delegate = self
     sceneView.debugOptions = [ARSCNDebugOptions.showWorldOrigin,
@@ -112,47 +152,13 @@ extension CanvasViewController: ARSCNViewDelegate {
   func renderer(_ renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: TimeInterval) {
     guard let cameraNode = sceneView.pointOfView else { return }
 
-    let transform = cameraNode.transform
+    let cameraPosition = self.getNodePosition(fromTransform: cameraNode.transform)
 
-    // The orientation is in the 3rd column of the transform matrix.
-    let orientation = SCNVector3(-transform.m31,
-                                 -transform.m32,
-                                 -transform.m33)
-
-    // The location is in the 4th column of the transform matrix.
-    let location = SCNVector3(transform.m41,
-                              transform.m42,
-                              transform.m43)
-    let position = orientation + location
-    print("location: \(location)\norientation: \(orientation)")
-
-    // removing nodes from the scene
-    // and checking the state of the “Paint” button
     DispatchQueue.main.async {
-      self.eraseNodes(named: self.brushNodeCursor.name) // reset: erase old cursor nodes
-
-      let brushNode = self.makeBrushNode(brushShape: self.brushSettings.shape,
-                                   brushSize: self.brushSettings.size,
-                                   position: position)
-
-
-      if self.userIsPressingPaintButton {
-        brushNode.geometry?.firstMaterial?.diffuse.contents = self.brushSettings.color
-        brushNode.geometry?.firstMaterial?.specular.contents = UIColor.white
-        if self.brushSettings.isSpinning {
-
-        }
-      } else {
-        brushNode.geometry?.firstMaterial?.diffuse.contents = self.brushNodeCursor.colour
-        brushNode.name = self.brushNodeCursor.name
-      }
-
-      self.sceneView.scene.rootNode.addChildNode(brushNode)
+      // reset: erase old cursor nodes
+      self.eraseNodes(named: self.paintNodeCursorState.name)
+      self.paintNode(at: cameraPosition)
     }
-  }
-
-  private var userIsPressingPaintButton: Bool {
-    return paintButton.isHighlighted
   }
 }
 
