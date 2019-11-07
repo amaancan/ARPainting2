@@ -115,16 +115,18 @@ class CanvasViewController: UIViewController {
     sceneView.scene.rootNode.addChildNode(paintNode)
   }
 
+  // Node's position = Sum of (a) where it is and (b) which way it is facing
   private func getNodePosition(fromTransform transform: SCNMatrix4) -> SCNVector3 {
+
+    // The location is in the 4th column of the transform matrix.
+    let nodeLocation = SCNVector3(transform.m41,
+                                  transform.m42,
+                                  transform.m43)
+
     // The orientation is in the 3rd column of the transform matrix.
     let nodeOrientation = SCNVector3(-transform.m31,
                                        -transform.m32,
                                        -transform.m33)
-
-    // The location is in the 4th column of the transform matrix.
-    let nodeLocation = SCNVector3(transform.m41,
-                                    transform.m42,
-                                    transform.m43)
 
     let nodePosition = nodeOrientation + nodeLocation
     return nodePosition
@@ -148,7 +150,7 @@ class CanvasViewController: UIViewController {
 // MARK: - ARSCNViewDelegate methods
 extension CanvasViewController: ARSCNViewDelegate {
 
-  // Called every time the augmented reality scene is about to be rendered (ideally, at least 60 times a second).
+  // Called just before the ARSCNView is about to draw the next frame (ideally, at least 60 times a second).
   func renderer(_ renderer: SCNSceneRenderer, willRenderScene scene: SCNScene, atTime time: TimeInterval) {
     guard let cameraNode = sceneView.pointOfView else { return }
 
