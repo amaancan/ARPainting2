@@ -15,6 +15,7 @@ class CanvasViewController: UIViewController {
   //
   // - Tracks the device’s position + orientation (its tilt around the 3 axises + real-world flat surfaces
   let configuration = ARWorldTrackingConfiguration()
+  let brushNodeCursor: (name: String , colour: UIColor) = ("cursor", .lightGray)
 
   required init?(coder aDecoder: NSCoder) {
     super.init(coder: aDecoder)
@@ -39,7 +40,7 @@ class CanvasViewController: UIViewController {
 
   // Create a node based on the current brush settings
   // and the camera’s current position.
-  func createBrush(brushShape: BrushSettings.Shape,
+  func makeBrushNode(brushShape: BrushSettings.Shape,
                    brushSize: CGFloat,
                    position: SCNVector3) -> SCNNode {
     let minSize: CGFloat = 0.02
@@ -128,17 +129,30 @@ extension CanvasViewController: ARSCNViewDelegate {
     // removing nodes from the scene
     // and checking the state of the “Paint” button
     DispatchQueue.main.async {
+      self.eraseNodes(named: self.brushNodeCursor.name) // reset: erase old cursor nodes
 
-      if self.paintButton.isHighlighted {
+      let brushNode = self.makeBrushNode(brushShape: self.brushSettings.shape,
+                                   brushSize: self.brushSettings.size,
+                                   position: position)
 
+
+      if self.userIsPressingPaintButton {
+        brushNode.geometry?.firstMaterial?.diffuse.contents = self.brushSettings.color
+        brushNode.geometry?.firstMaterial?.specular.contents = UIColor.white
         if self.brushSettings.isSpinning {
 
         }
       } else {
-
+        brushNode.geometry?.firstMaterial?.diffuse.contents = self.brushNodeCursor.colour
+        brushNode.name = self.brushNodeCursor.name
       }
 
+      self.sceneView.scene.rootNode.addChildNode(brushNode)
     }
+  }
+
+  private var userIsPressingPaintButton: Bool {
+    return paintButton.isHighlighted
   }
 }
 
