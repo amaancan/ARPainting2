@@ -99,14 +99,14 @@ class CanvasViewController: UIViewController {
                                        brushSize: brushSettings.size,
                                        position: position)
 
-
     if userIsPressingPaintButton {
       paintNode.geometry?.firstMaterial?.diffuse.contents = brushSettings.color
       paintNode.geometry?.firstMaterial?.specular.contents = UIColor.white
 
       if brushSettings.isSpinning {
-
+        spin(node: paintNode)
       }
+
     } else {
       paintNode.geometry?.firstMaterial?.diffuse.contents = paintNodeCursorState.colour
       paintNode.name = paintNodeCursorState.name
@@ -115,6 +115,14 @@ class CanvasViewController: UIViewController {
     sceneView.scene.rootNode.addChildNode(paintNode)
   }
 
+  private func spin(node: SCNNode) {
+    let rotateAction = SCNAction.rotate(by: 2 * .pi,
+                                        around: SCNVector3(0, 1, 0),
+                                        duration: 3)
+    let rotateForeverAction = SCNAction.repeatForever(rotateAction)
+    node.runAction(rotateForeverAction)
+  }
+  
   // Node's position = Sum of (a) where it is and (b) which way it is facing
   private func getNodePosition(fromTransform transform: SCNMatrix4) -> SCNVector3 {
 
